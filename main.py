@@ -3,6 +3,10 @@ from models import User, Message
 
 
 def main_menu():
+    """
+        Wyświetla główne menu aplikacji.
+        Displays the main menu of the application.
+        """
     print("1. Zarządzaj użytkownikami")
     print("2. Zarządzaj wiadomościami")
     print("0. Wyjście")
@@ -19,6 +23,10 @@ def main_menu():
 
 
 def manage_users():
+    """
+        Wyświetla menu zarządzania użytkownikami.
+        Displays the user management menu.
+        """
     print("1. Dodaj użytkownika")
     print("2. Zmodyfikuj użytkownika")
     print("3. Usuń użytkownika")
@@ -41,6 +49,10 @@ def manage_users():
 
 
 def add_user():
+    """
+        Pozwala na dodanie nowego użytkownika.
+        Allows adding a new user.
+        """
     username = input("Podaj nazwę użytkownika: ")
     password = input("Podaj hasło: ")
     user = User(username=username, password=password)
@@ -51,6 +63,10 @@ def add_user():
 
 
 def modify_user():
+    """
+       Pozwala na modyfikację istniejącego użytkownika.
+       Allows modifying an existing user.
+       """
     user_id = input("Podaj ID użytkownika do modyfikacji: ")
     new_username = input("Podaj nową nazwę użytkownika: ")
     new_password = input("Podaj nowe hasło: ")
@@ -67,6 +83,10 @@ def modify_user():
 
 
 def delete_user():
+    """
+       Umożliwia usunięcie użytkownika.
+       Enables the deletion of a user.
+       """
     user_id = input("Podaj ID użytkownika do usunięcia: ")
     with connect() as conn:
         with conn.cursor() as cursor:
@@ -77,7 +97,12 @@ def delete_user():
             else:
                 print("Nie znaleziono użytkownika.")
 
+
 def list_users():
+    """
+        Wyświetla listę wszystkich użytkowników.
+        Displays a list of all users.
+        """
     with connect() as conn:
         with conn.cursor() as cursor:
             users = User.load_all_users(cursor)
@@ -86,6 +111,10 @@ def list_users():
 
 
 def manage_messages():
+    """
+       Wyświetla menu zarządzania wiadomościami.
+       Displays the message management menu.
+       """
     print("1. Wyślij wiadomość")
     print("2. Pokaż moje wiadomości")
     print("0. Powrót do głównego menu")
@@ -102,6 +131,10 @@ def manage_messages():
 
 
 def send_message():
+    """
+       Pozwala na wysłanie wiadomości do innego użytkownika.
+       Allows sending a message to another user.
+       """
     from_id = input("Podaj swoje ID: ")
     to_id = input("Podaj ID odbiorcy: ")
     text = input("Wpisz wiadomość: ")
@@ -113,7 +146,11 @@ def send_message():
 
 
 def list_messages():
-    user_id = input("Podaj swoje ID, aby zobaczyć wiadomości: ")
+    """
+       Wyświetla wszystkie wiadomości dla danego użytkownika.
+       Displays all messages for a given user.
+       """
+    user_id = input(int("Podaj swoje ID, aby zobaczyć wiadomości: "))
     with connect() as conn:
         with conn.cursor() as cursor:
             messages = Message.load_all_messages(cursor, user_id)
@@ -122,5 +159,9 @@ def list_messages():
 
 
 if __name__ == "__main__":
+    """
+        Główny punkt wejścia do aplikacji. Wywołuje główne menu w pętli.
+        The main entry point of the application. Calls the main menu in a loop.
+        """
     while True:
         main_menu()

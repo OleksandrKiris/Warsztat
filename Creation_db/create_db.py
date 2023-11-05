@@ -2,24 +2,25 @@ import psycopg2
 from psycopg2 import OperationalError, errors
 
 
-# Dane konfiguracyjne___________________________________________________________________________________________________
+"""Configuration data"""""
 settings = {
     'host': 'localhost',
     'user': 'postgres',
     'password': 'Citro123456ok',
-    'dbname': 'postgres'  # Baza danych domyślna do tworzenia nowej bazy    DLA KOLEJNYCH SKRYPTÓW PAMIĘTAJ!
+    'dbname': 'postgres'  # Default database for creating a new database   /DLA KOLEJNYCH SKRYPTÓW PAMIĘTAJ!
 }
 
 target_db_name = 'my_db'
 
+"""Function to create database if it doesn't exist"""
 
-# Funkcja do tworzenia bazy danych, jeśli nie istnieje__________________________________________________________________
+
 def create_database(settings, db_name):
-    settings = settings.copy()
+    config_settings = settings.copy()
     connection = None
     cursor = None
     try:
-        connection = psycopg2.connect(**settings)
+        connection = psycopg2.connect(**config_settings)
         connection.autocommit = True
         cursor = connection.cursor()
         cursor.execute(f"CREATE DATABASE {db_name}")
@@ -35,10 +36,12 @@ def create_database(settings, db_name):
             connection.close()
 
 
-# Funkcja do tworzenia tabel____________________________________________________________________________________________
-def create_tables(settings,db_name):
+""""Function to create tables"""
+
+
+def create_tables(settings, db_name):
     settings = settings.copy()
-    settings['dbname'] = db_name  # Przełączanie na nowo utworzoną bazę danych
+    settings['dbname'] = db_name  # Switching to the newly created database
     connection = None
     cursor = None
     try:
@@ -46,7 +49,7 @@ def create_tables(settings,db_name):
         connection.autocommit = True
         cursor = connection.cursor()
 
-        # Tworzenie tabeli użytkowników________________________________________________________________________________
+        """# Create a user table"""
         try:
             cursor.execute("""
                 CREATE TABLE users (
@@ -59,17 +62,19 @@ def create_tables(settings,db_name):
         except errors.DuplicateTable:
             print("Tabela 'users' już istnieje.")
 
-        # Tworzenie tabeli komunikatów__________________________________________________________________________________
+        """"Creating a message table"""
         try:
             cursor.execute("""
                 CREATE TABLE messages (
                     id SERIAL PRIMARY KEY,
                     from_id INTEGER REFERENCES users(id),
                     to_id INTEGER REFERENCES users(id),
-                    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  --JEżeli przy wstawianiu rekordu nie zostanie podana wartość dla tej kolumny, automatycznie zostanie użyta bieżąca data i godzina
+                    creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
                     text VARCHAR(255)
                 );
             """)
+            """creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  --JEżeli przy wstawianiu rekordu nie zostanie 
+            podana wartość dla tej kolumny, automatycznie zostanie użyta bieżąca data i godzina"""
             print("Tabela 'messages' została stworzona.")
         except errors.DuplicateTable:
             print("Tabela 'messages' już istnieje.")
@@ -83,6 +88,6 @@ def create_tables(settings,db_name):
             connection.close()
 
 
-# Wywołanie funkcji tworzących bazę danych i tabele_____________________________________________________________________
+"""Calling functions that create a database and tablesCalling functions that create a database and tables"""
 create_database(settings, target_db_name)
 create_tables(settings, target_db_name)
