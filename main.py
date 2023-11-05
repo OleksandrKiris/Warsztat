@@ -150,7 +150,7 @@ def list_messages():
        Wyświetla wszystkie wiadomości dla danego użytkownika.
        Displays all messages for a given user.
        """
-    user_id = input(int("Podaj swoje ID, aby zobaczyć wiadomości: "))
+    user_id = int(input("Podaj swoje ID, aby zobaczyć wiadomości: "))
     with connect() as conn:
         with conn.cursor() as cursor:
             messages = Message.load_all_messages(cursor, user_id)

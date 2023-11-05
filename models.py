@@ -181,17 +181,17 @@ class User:
                 :rtype: bool
                 """
         if self._id == -1:
-            sql = """INSERT INTO users(username, hashed_password)
+            query = """INSERT INTO users(username, hashed_password)
                             VALUES(%s, %s) RETURNING id"""
             values = (self.username, self.hashed_password)
-            cursor.execute(sql, values)
+            cursor.execute(query, values)
             self._id = cursor.fetchone()[0]  # or cursor.fetchone()['id']
             return True
         else:
-            sql = """UPDATE Users SET username=%s, hashed_password=%s
+            query = """UPDATE Users SET username=%s, hashed_password=%s
                            WHERE id=%s"""
             values = (self.username, self.hashed_password, self.id)
-            cursor.execute(sql, values)
+            cursor.execute(query, values)
             return True
 
     @staticmethod
@@ -211,8 +211,8 @@ class User:
                :return: Zwraca instancję Użytkownika jeśli znajdzie, w przeciwnym razie None.
                :rtype: User or None
                """
-        sql = "SELECT id, username, hashed_password FROM users WHERE id=%s"
-        cursor.execute(sql, (id_,))  # (id_, ) - cause we need a tuple
+        query = "SELECT id, username, hashed_password FROM users WHERE id=%s"
+        cursor.execute(query, (id_,))  # (id_, ) - cause we need a tuple
         data = cursor.fetchone()
         if data:
             id_, username, hashed_password = data
@@ -236,9 +236,9 @@ class User:
                :return: Zwraca listę instancji Użytkowników.
                :rtype: list of User
                """
-        sql = "SELECT id, username, hashed_password FROM Users"
+        query = "SELECT id, username, hashed_password FROM Users"
         users = []
-        cursor.execute(sql)
+        cursor.execute(query)
         for row in cursor.fetchall():
             id_, username, hashed_password = row
             loaded_user = User()
@@ -262,8 +262,8 @@ class User:
               :return: Zwraca True, jeśli użytkownik został pomyślnie usunięty.
               :rtype: bool
               """
-        sql = "DELETE FROM Users WHERE id=%s"
-        cursor.execute(sql, (self.id,))
+        query = "DELETE FROM Users WHERE id=%s"
+        cursor.execute(query, (self.id,))
         self._id = -1
         return True
 
@@ -319,17 +319,17 @@ class Message:
                :return: True if the message was saved successfully, False otherwise.
                """
         if self._id == -1:
-            sql = """INSERT INTO messages(from_id, to_id, text, creation_date)
+            query = """INSERT INTO messages(from_id, to_id, text, creation_date)
                      VALUES(%s, %s, %s, %s) RETURNING id"""
             values = (self.from_id, self.to_id, self.text, self.creation_date)
-            cursor.execute(sql, values)
+            cursor.execute(query, values)
             self._id = cursor.fetchone()[0]
             return True
         else:
-            sql = """UPDATE messages SET from_id=%s, to_id=%s, text=%s, creation_date=%s
+            query = """UPDATE messages SET from_id=%s, to_id=%s, text=%s, creation_date=%s
                       WHERE id=%s"""
             values = (self.from_id, self.to_id, self.text, self.creation_date, self._id)
-            cursor.execute(sql, values)
+            cursor.execute(query, values)
             return True
 
     @staticmethod
@@ -349,8 +349,8 @@ class Message:
                :rtype: Message or None
                :return: The loaded message if found, None otherwise.
                """
-        sql = "SELECT id, from_id, to_id, text, creation_date FROM messages WHERE id=%s"
-        cursor.execute(sql, (id_,))
+        query = "SELECT id, from_id, to_id, text, creation_date FROM messages WHERE id=%s"
+        cursor.execute(query, (id_,))
         data = cursor.fetchone()
         if data:
             id_, from_id, to_id, text, creation_date = data
@@ -360,25 +360,28 @@ class Message:
         return None
 
     @staticmethod
-    def load_all_messages(cursor):
+    def load_all_messages(cursor, user_id):
         """
-                Loads all messages from the database.
+                Loads all messages for a given user from the database.
 
-                EN: Retrieves all messages from the database and returns them as a list of Message objects.
-                PL: Pobiera wszystkie wiadomości z bazy danych i zwraca je jako listę obiektów Message.
+                EN: Retrieves all messages for the specified user from the database and returns them as a list of Message objects.
+                PL: Pobiera wszystkie wiadomości dla określonego użytkownika z bazy danych i zwraca je jako listę obiektów Message.
 
                 :param cursor: The database cursor to use for the query.
+                :param user_id: The ID of the user whose messages to retrieve.
                 :type cursor: cursor
+                :type user_id: int
 
                 :rtype: list[Message]
-                :return: A list of all loaded messages.
+                :return: A list of all loaded messages for the given user.
                 """
-        sql = "SELECT id, from_id, to_id, text, creation_date FROM messages"
+        query = "SELECT id, from_id, to_id, text, creation_date FROM messages WHERE from_id=%s OR to_id=%s"
         messages = []
-        cursor.execute(sql)
+        cursor.execute(query, (user_id, user_id))
         for row in cursor.fetchall():
             id_, from_id, to_id, text, creation_date = row
             loaded_message = Message(from_id, to_id, text, creation_date)
             loaded_message._id = id_
             messages.append(loaded_message)
         return messages
+
